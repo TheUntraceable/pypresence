@@ -16,6 +16,7 @@ from .payloads import Payload
 
 logger = getLogger("pypresence.client")
 
+
 class Client(BaseClient):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -311,14 +312,26 @@ class AioClient(BaseClient):
                 self.sock_reader._paused = True
 
         logger.debug("Received data: %s", data)
-        payload = json.loads(data[8:].decode("utf-8"))
 
-        if payload["evt"] is not None:
-            evt = payload["evt"].lower()
-            if evt in self._events:
-                asyncio.create_task(self._events[evt](payload["data"]))
-            elif evt == "error":
-                raise DiscordError(payload["data"]["code"], payload["data"]["message"])
+        delimiter = b"\x01\x00\x00\x00h\x00\x00\x00"
+        start = 0
+
+        while True:
+            end = data.find(delimiter, start)
+            if end == -1:
+                break
+            json_string = data[start + 8 : end].decode("utf-8")
+            payload = json.loads(json_string)
+
+            if payload["evt"] is not None:
+                evt = payload["evt"].lower()
+                if evt in self._events:
+                    asyncio.create_task(self._events[evt](payload["data"]))
+                elif evt == "error":
+                    raise DiscordError(
+                        payload["data"]["code"], payload["data"]["message"]
+                    )
+            start = end + 8
 
     async def authorize(self, client_id: str, scopes: List[str]):
         payload = Payload.authorize(client_id, scopes)

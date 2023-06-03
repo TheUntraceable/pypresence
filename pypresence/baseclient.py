@@ -23,6 +23,7 @@ from .utils import get_ipc_path, get_event_loop
 
 logger = getLogger("pypresence.client")
 
+
 class BaseClient:
     def __init__(
         self,
@@ -107,7 +108,7 @@ class BaseClient:
             raise PipeClosed
         except asyncio.TimeoutError:
             raise ResponseTimeout
-    
+
         logger.debug(f"Received data: {data.decode('utf-8')}")
 
         payload = json.loads(data.decode("utf-8"))
