@@ -324,7 +324,7 @@ class AioClient(BaseClient):
             if payload["evt"] is not None:
                 evt = payload["evt"].lower()
                 if evt in self._events:
-                    self._events[evt](payload["data"])
+                    asyncio.create_task(self._events[evt](payload["data"]))
                 elif evt == "error":
                     raise DiscordError(
                         payload["data"]["code"], payload["data"]["message"]
