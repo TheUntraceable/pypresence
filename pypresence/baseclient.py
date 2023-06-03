@@ -74,11 +74,7 @@ class BaseClient:
 
             loop.set_exception_handler(err_handler)
             self.handler = handler
-
-        if getattr(self, "on_event", None):  # Tasty bad code ;^)
-            self._events_on = True
-        else:
-            self._events_on = False
+        self._events_on = hasattr(self, "on_event")
 
     def update_event_loop(self, loop):
         # noinspection PyAttributeOutsideInit
