@@ -270,9 +270,7 @@ class AioClient(BaseClient):
 
     def event(self, event_name: Optional[str] = None, args={}):
         def wrapper(func: Callable):
-            if inspect.iscoroutinefunction(func):
-                raise NotImplementedError
-            elif len(inspect.signature(func).parameters) != 1:
+            if len(inspect.signature(func).parameters) != 1:
                 raise ArgumentError
 
             if event_name is None:
