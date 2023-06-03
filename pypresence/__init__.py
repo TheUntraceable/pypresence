@@ -27,7 +27,7 @@ __title__ = "pypresence"
 __author__ = "qwertyquerty"
 __copyright__ = "Copyright 2018 - Current qwertyquerty"
 __license__ = "MIT"
-__version__ = "4.2.5"
+__version__ = "4.2.6"
 __all__ = (
     "BaseClient",
     "Client",
