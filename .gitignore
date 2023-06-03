@@ -19,3 +19,4 @@ test.py
 .mypy_cache/
 *.egg-info/
 .vscode
+.ruff_cache
