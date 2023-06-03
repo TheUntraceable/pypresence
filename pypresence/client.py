@@ -2,6 +2,7 @@ import asyncio
 import inspect
 import struct
 import json
+from logging import getLogger
 import os
 from typing import Callable, List, Optional
 
@@ -13,6 +14,7 @@ from .exceptions import (
 )
 from .payloads import Payload
 
+logger = getLogger("pypresence.client")
 
 class Client(BaseClient):
     def __init__(self, *args, **kwargs):
@@ -308,6 +310,7 @@ class AioClient(BaseClient):
             else:
                 self.sock_reader._paused = True
 
+        logger.debug("Received data: %s", data.decode("utf-8"))
         payload = json.loads(data[8:].decode("utf-8"))
 
         if payload["evt"] is not None:
