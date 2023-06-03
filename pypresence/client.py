@@ -313,25 +313,22 @@ class AioClient(BaseClient):
 
         logger.debug("Received data: %s", data)
 
-        delimiter = b"\x01\x00\x00\x00h\x00\x00\x00"
-        start = 0
-
-        while True:
-            end = data.find(delimiter, start)
-            if end == -1:
-                break
-            json_string = data[start + 8 : end].decode("utf-8")
-            payload = json.loads(json_string)
+        end = 0
+        while end < len(data):
+            # While chunks are available in data
+            start = end + 8
+            status_code, length = struct.unpack("<II", data[end:start])
+            end = length + start
+            payload = json.loads(data[start:end].decode("utf-8"))
 
             if payload["evt"] is not None:
                 evt = payload["evt"].lower()
                 if evt in self._events:
-                    asyncio.create_task(self._events[evt](payload["data"]))
+                    self._events[evt](payload["data"])
                 elif evt == "error":
                     raise DiscordError(
                         payload["data"]["code"], payload["data"]["message"]
                     )
-            start = end + 8
 
     async def authorize(self, client_id: str, scopes: List[str]):
         payload = Payload.authorize(client_id, scopes)
