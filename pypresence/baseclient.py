@@ -4,6 +4,7 @@ import json
 import struct
 import sys
 from typing import Any, Union, Optional
+from logging import getLogger
 
 from .exceptions import (
     DiscordNotFound,
@@ -20,6 +21,7 @@ from .exceptions import (
 from .payloads import Payload
 from .utils import get_ipc_path, get_event_loop
 
+logger = getLogger("pypresence.client")
 
 class BaseClient:
     def __init__(
@@ -105,6 +107,8 @@ class BaseClient:
             raise PipeClosed
         except asyncio.TimeoutError:
             raise ResponseTimeout
+    
+        logger.debug(f"Received data: {data.decode('utf-8')}")
 
         payload = json.loads(data.decode("utf-8"))
 
@@ -121,6 +125,8 @@ class BaseClient:
         assert (
             self.sock_writer is not None
         ), "You must connect your client before sending events!"
+
+        logger.debug(f"Sending data: {payload}")
 
         self.sock_writer.write(
             struct.pack("<II", op, len(payload)) + payload.encode("utf-8")
