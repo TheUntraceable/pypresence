@@ -310,7 +310,7 @@ class AioClient(BaseClient):
             else:
                 self.sock_reader._paused = True
 
-        logger.debug("Received data: %s", data.decode("utf-8"))
+        logger.debug("Received data: %s", data)
         payload = json.loads(data[8:].decode("utf-8"))
 
         if payload["evt"] is not None:
