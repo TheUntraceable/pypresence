@@ -37,9 +37,9 @@ class DiscordError(PyPresenceException):
         self.code = code
         self.message = message
         super().__init__(
-            "Error Code: {0} Message: {1}".format(code, message)
-            if not override
-            else message
+            message
+            if override
+            else "Error Code: {0} Message: {1}".format(code, message)
         )
 
 

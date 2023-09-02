@@ -82,7 +82,7 @@ class BaseClient:
     def update_event_loop(self, loop):
         # noinspection PyAttributeOutsideInit
         self.loop = loop
-        asyncio.set_event_loop(self.loop)
+        asyncio.set_event_loop(loop)
 
     def _err_handle(self, loop, context: dict):
         result = self.handler(context["exception"], context["future"])
@@ -104,10 +104,10 @@ class BaseClient:
             data = await asyncio.wait_for(
                 self.sock_reader.read(length), self.response_timeout
             )
-        except (BrokenPipeError, struct.error):
-            raise PipeClosed
-        except asyncio.TimeoutError:
-            raise ResponseTimeout
+        except (BrokenPipeError, struct.error) as e:
+            raise PipeClosed from e
+        except asyncio.TimeoutError as e:
+            raise ResponseTimeout from e
 
         logger.debug(f"Received data: {data.decode('utf-8')}")
 
@@ -118,10 +118,11 @@ class BaseClient:
 
         return payload
 
-    def send_data(self, op: int, payload: Union[dict, Payload]):
+    def send_data(self, op: int, payload: Union[dict[Any, Any], Payload]):
         if isinstance(payload, Payload):
             payload = payload.data
-        payload = json.dumps(payload)
+        elif isinstance(payload, dict):
+            payload = json.dumps(payload)
 
         assert (
             self.sock_writer is not None
@@ -139,11 +140,11 @@ class BaseClient:
             raise DiscordNotFound
 
         try:
-            if sys.platform == "linux" or sys.platform == "darwin":
+            if sys.platform in ["linux", "darwin"]:
                 self.sock_reader, self.sock_writer = await asyncio.wait_for(
                     asyncio.open_unix_connection(ipc_path), self.connection_timeout
                 )
-            elif sys.platform == "win32" or sys.platform == "win64":
+            elif sys.platform in ["win32", "win64"]:
                 self.sock_reader = asyncio.StreamReader(loop=self.loop)
                 reader_protocol = asyncio.StreamReaderProtocol(
                     self.sock_reader, loop=self.loop
@@ -152,10 +153,10 @@ class BaseClient:
                     self.loop.create_pipe_connection(lambda: reader_protocol, ipc_path),
                     self.connection_timeout,
                 )
-        except FileNotFoundError:
-            raise InvalidPipe
-        except asyncio.TimeoutError:
-            raise ConnectionTimeout
+        except FileNotFoundError as e:
+            raise InvalidPipe from e
+        except asyncio.TimeoutError as e:
+            raise ConnectionTimeout from e
 
         self.send_data(0, {"v": 1, "client_id": self.client_id})
 
@@ -172,3 +173,6 @@ class BaseClient:
 
         if self._events_on:
             self.sock_reader.feed_data = self.on_event
+
+    def on_event(self, data):
+        ...

@@ -30,11 +30,7 @@ class Client(BaseClient):
             elif len(inspect.signature(func).parameters) != 1:
                 raise ArgumentError
 
-            if event_name is None:
-                event = func.__name__
-            else:
-                event = event_name
-
+            event = func.__name__ if event_name is None else event_name
             self._events[event.lower()] = func
 
             return func
@@ -276,11 +272,7 @@ class AioClient(BaseClient):
             if len(inspect.signature(func).parameters) != 1:
                 raise ArgumentError
 
-            if event_name is None:
-                event = func.__name__
-            else:
-                event = event_name
-
+            event = func.__name__ if event_name is None else event_name
             self._events[event.lower()] = func
 
             return func

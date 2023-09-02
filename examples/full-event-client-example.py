@@ -23,7 +23,7 @@ c.authenticate(token["access_token"])
 
 
 def on_new_message(data):
-    print("New message: %s" % data["message"]["content"])
+    print(f'New message: {data["message"]["content"]}')
 
 
 # Watch for new messages created on channel 444444444444444444

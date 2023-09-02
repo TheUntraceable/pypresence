@@ -52,6 +52,4 @@ def get_event_loop(force_fresh=False):
         running = asyncio.get_running_loop()
     except RuntimeError:
         return asyncio.new_event_loop()
-    if running.is_closed():
-        return asyncio.new_event_loop()
-    return running
+    return asyncio.new_event_loop() if running.is_closed() else running
